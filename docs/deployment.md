@@ -37,10 +37,32 @@ Cloud Run.
    commit and applies exactly that plan, deploying a new Cloud Run
    revision.
 
+### Optional manual sandbox gate
+
+For stronger confidence before merge/apply, run
+`cloudbuild/sandbox-gate.yaml` manually against a sandbox project. This
+pipeline performs a real `terraform init/validate/plan` with sandbox
+backend/vars files and never applies resources.
+
+The intended order becomes:
+
+1. PR `plan.yaml` (static + plan checks).
+2. Manual `sandbox-gate.yaml` (real plan against sandbox).
+3. Merge to `main` -> `apply.yaml`.
+
 This repository does **not** automate step 3 (no cross-repository PR
 creation) and does **not** create the actual Cloud Build triggers, since
 this repository is not connected to any remote/CI system as part of this
 exercise (see root README "Restrictions").
+
+## Checkov behavior in `cloudbuild/plan.yaml`
+
+`plan.yaml` now runs Checkov in enforced mode by default
+(`_CHECKOV_SOFT_FAIL="false"`).
+
+If a team needs temporary exploratory runs while triaging findings, the
+trigger can set `_CHECKOV_SOFT_FAIL="true"` to keep reporting findings
+without failing the build.
 
 ## Bootstrap sequence (first-time setup)
 

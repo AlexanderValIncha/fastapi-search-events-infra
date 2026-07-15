@@ -49,10 +49,15 @@ steps:
     args:
       - -c
       - |
-        checkov -d "${_TF_ROOT}" --compact --quiet || true
-    # `|| true`: Checkov findings are surfaced but do not (in this study
-    # setup) hard-fail the plan pipeline. Tighten this once findings have
-    # been triaged (see docs/decisions.md, Cloud Run public invoker note).
+        if [ "${_CHECKOV_SOFT_FAIL}" = "true" ]; then
+          echo "Running Checkov in soft-fail mode (_CHECKOV_SOFT_FAIL=true)"
+          checkov -d "${_TF_ROOT}" --compact --quiet || true
+        else
+          echo "Running Checkov in enforced mode (_CHECKOV_SOFT_FAIL=false)"
+          checkov -d "${_TF_ROOT}" --compact --quiet
+        fi
+    # Default is enforced mode. Soft-fail can be explicitly enabled per
+    # trigger for exploratory runs while findings are being triaged.
 
   - id: terraform-plan
     name: hashicorp/terraform:1.7
@@ -66,6 +71,7 @@ substitutions:
   _TF_ROOT: "environments/study"
   _BACKEND_CONFIG: "backend.hcl"
   _VAR_FILE: "terraform.tfvars"
+  _CHECKOV_SOFT_FAIL: "false"
 
 options:
   logging: CLOUD_LOGGING_ONLY

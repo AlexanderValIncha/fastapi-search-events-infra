@@ -98,15 +98,17 @@ benefit at this scale.
 
 ## Bootstrap sequence (summary)
 
-1. Apply `bootstrap/` (APIs, Artifact Registry, Terraform state bucket) --
-   uses local state, see [bootstrap/README.md](bootstrap/README.md).
-2. Push the first application image; note its digest.
-3. Add the real Bearer token value via `gcloud secrets versions add`
-   (outside Terraform).
-4. Set `container_image` (by digest) in `environments/study`.
+Concise sequence:
+
+1. Apply `bootstrap/` first.
+2. Push image and capture digest.
+3. Add Bearer token secret value outside Terraform.
+4. Set `container_image` by digest.
 5. Apply `environments/study/`.
 
-Full detail in [docs/deployment.md](docs/deployment.md).
+Detailed step-by-step instructions, CI handoff contract, Checkov mode,
+and the optional manual sandbox gate are in
+[docs/deployment.md](docs/deployment.md).
 
 ## Assumptions
 
