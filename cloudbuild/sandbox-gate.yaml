@@ -1,0 +1,45 @@
+# Cloud Build configuration: OPTIONAL manual sandbox gate.
+#
+# Purpose: run a real `terraform plan` against a sandbox project using real
+# credentials/backend before allowing a production-oriented apply flow.
+#
+# Intended trigger:
+# - Manual only (no automatic trigger on PR or merge).
+# - Uses sandbox backend/vars files (not production).
+# - Never applies changes.
+#
+# This gate is intentionally optional for the study exercise, but available
+# when teams want a stronger pre-merge signal than `fmt/init/validate`.
+
+steps:
+  - id: terraform-init
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform init -backend-config="${_BACKEND_CONFIG}"
+
+  - id: terraform-validate
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform validate
+
+  - id: terraform-plan-sandbox
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform plan -var-file="${_VAR_FILE}" -out=tfplan.sandbox.binary
+
+substitutions:
+  _TF_ROOT: "environments/study"
+  _BACKEND_CONFIG: "backend.sandbox.hcl"
+  _VAR_FILE: "terraform.sandbox.tfvars"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
