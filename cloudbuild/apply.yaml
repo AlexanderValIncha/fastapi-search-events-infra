@@ -1,0 +1,59 @@
+# Cloud Build configuration: Terraform APPLY.
+#
+# Intended trigger: ONLY on merges to `main`, with an approval step
+# configured on the trigger itself (Cloud Build manual approval) or via an
+# external process. This repository does NOT create that trigger -- see
+# docs/deployment.md and the root README for why (repo is not connected /
+# published yet).
+#
+# Design: generate a fresh plan from the exact commit on `main`, save it to
+# a file, and apply *that specific plan file* -- never a bare
+# `terraform apply` with implicit re-planning -- so what gets applied is
+# guaranteed to be what was reviewed.
+
+steps:
+  - id: terraform-init
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform init -backend-config="${_BACKEND_CONFIG}"
+
+  - id: terraform-validate
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform validate
+
+  - id: terraform-plan
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform plan -var-file="${_VAR_FILE}" -out=tfplan.binary
+
+  - id: terraform-apply
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform apply tfplan.binary
+
+substitutions:
+  _TF_ROOT: "environments/study"
+  _BACKEND_CONFIG: "backend.hcl"
+  _VAR_FILE: "terraform.tfvars"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Note: this pipeline must run under a dedicated "Terraform deployer"
+# service account (see docs/iam.md), separate from the FastAPI application's
+# own build/deploy pipeline. The application repository's CI never runs
+# Terraform and never touches Cloud Run directly -- Terraform is the single
+# source of truth for what is deployed (see docs/deployment.md).

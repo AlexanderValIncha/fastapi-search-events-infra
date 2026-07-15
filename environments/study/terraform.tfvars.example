@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (gitignored). Never commit real values here.
+
+project_id      = "REPLACE_WITH_REAL_PROJECT_ID"
+region          = "europe-west1"
+partner_id      = "demo-ota"
+container_image = "europe-west1-docker.pkg.dev/REPLACE_WITH_REAL_PROJECT_ID/hotel-search-api/hotel-search-api@sha256:REPLACE_WITH_REAL_DIGEST"

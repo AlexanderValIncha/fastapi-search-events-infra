@@ -1,0 +1,21 @@
+# Terraform working files / state -- never commit real state or plans.
+.terraform/
+.terraform.tfstate.lock.info
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan.binary
+crash.log
+crash.*.log
+
+# Real, filled-in configuration -- only the .example templates are tracked.
+backend.hcl
+terraform.tfvars
+*.auto.tfvars
+
+# Local tooling caches.
+.checkov/
+.tflint.d/
+
+# OS noise.
+.DS_Store

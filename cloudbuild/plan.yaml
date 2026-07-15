@@ -1,0 +1,71 @@
+# Cloud Build configuration: Terraform PLAN only.
+#
+# Intended trigger: any pull request against `environments/study` (or
+# `bootstrap`, via a second, analogous config if needed). Never applies
+# changes. Safe to run automatically on PRs.
+#
+# Substitutions (set on the trigger, not hardcoded here):
+#   _TF_ROOT         e.g. "environments/study"
+#   _BACKEND_CONFIG  e.g. "backend.hcl" (must be provisioned as a build
+#                    secret/config outside this repo; never committed)
+#   _VAR_FILE        e.g. "terraform.tfvars" (same as above)
+
+steps:
+  - id: terraform-fmt-check
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform fmt -check -recursive
+
+  - id: terraform-init
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform init -backend-config="${_BACKEND_CONFIG}"
+
+  - id: terraform-validate
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform validate
+
+  - id: tflint
+    name: ghcr.io/terraform-linters/tflint:latest
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && tflint --init && tflint --recursive
+
+  - id: checkov
+    name: bridgecrew/checkov:latest
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        checkov -d "${_TF_ROOT}" --compact --quiet || true
+    # `|| true`: Checkov findings are surfaced but do not (in this study
+    # setup) hard-fail the plan pipeline. Tighten this once findings have
+    # been triaged (see docs/decisions.md, Cloud Run public invoker note).
+
+  - id: terraform-plan
+    name: hashicorp/terraform:1.7
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd "${_TF_ROOT}" && terraform plan -var-file="${_VAR_FILE}" -out=tfplan.binary
+
+substitutions:
+  _TF_ROOT: "environments/study"
+  _BACKEND_CONFIG: "backend.hcl"
+  _VAR_FILE: "terraform.tfvars"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,8 @@
+# Copy to backend.hcl (gitignored) and fill in the bucket created by the
+# bootstrap stack (see bootstrap/outputs.tf -> state_bucket_name).
+#
+# Usage:
+#   terraform init -backend-config=backend.hcl
+
+bucket = "REPLACE_WITH_REAL_PROJECT_ID-tfstate-hotel-search-ingestion"
+prefix = "environments/study"
