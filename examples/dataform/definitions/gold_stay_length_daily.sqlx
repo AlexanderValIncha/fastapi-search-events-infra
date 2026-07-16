@@ -1,0 +1,17 @@
+config {
+  type: "table",
+  schema: "hotel_search_gold",
+  name: "stay_length_daily",
+  tags: ["gold", "trend"]
+}
+
+select
+  city,
+  search_date,
+  length_of_stay,
+  sum(search_count) as search_count
+from ${ref("fact_search_event")}
+where city is not null
+  and search_date is not null
+  and length_of_stay is not null
+group by city, search_date, length_of_stay;

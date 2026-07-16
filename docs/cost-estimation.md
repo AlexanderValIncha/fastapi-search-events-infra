@@ -48,3 +48,34 @@ No specific monthly dollar figure is provided in this document, since any
 such figure would imply a precision this exercise cannot support. Use the
 GCP Pricing Calculator with the volumes above, and current list prices,
 before making any real budgeting decision.
+
+## Rough monthly envelope (design-level)
+
+For the assumed steady traffic profile in this study, the whole pipeline
+(ingestion + messaging + raw storage + archive + transformation orchestration)
+is expected to be in a low-to-mid 4-digit USD/month envelope in a typical
+EU region, with Cloud Run and BigQuery as the dominant components.
+
+Expected cost dominance order:
+
+1. Cloud Run (continuous baseline due to `min_instances` and `cpu_idle=false`).
+2. BigQuery (storage + transformation/query processing once Silver/Gold runs).
+3. Pub/Sub throughput (publish + deliveries).
+4. GCS archive storage/operations.
+5. Dataform orchestration overhead (small vs compute/storage).
+
+This remains an estimate only; a real quote requires observed concurrency,
+query volume, and refresh cadence.
+
+## Cost reduction strategies
+
+- Revisit Cloud Run sizing and billing mode after real load tests
+  (`min_instances`, concurrency, CPU/memory).
+- Partition and cluster Silver/Gold tables by the actual query filters
+  (city, date) to reduce scanned bytes.
+- Pre-aggregate daily Gold tables to avoid repeated heavy ad-hoc queries.
+- Run Dataform incrementally (partition-based MERGE/INSERT) instead of
+  full refresh.
+- Keep strict lifecycle policies on archive data and avoid frequent cold
+  data reads.
+- Add budgets and alerts at project and label scope to detect drift early.

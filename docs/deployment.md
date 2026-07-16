@@ -133,3 +133,31 @@ Select-String -Path $files -Pattern 'C:\\Users\\|/home/|BEGIN (RSA|OPENSSH|EC) P
 ```
 
 The command should return no matches for tracked repository content.
+
+## Extension plan for RAW -> Silver -> Gold (Dataform)
+
+If this repository is extended for analytics serving, the recommended
+provision/apply strategy is:
+
+1. Keep Terraform ownership for infrastructure only:
+   BigQuery datasets (`raw`, `silver`, `gold`), Dataform repository,
+   Dataform release/workflow configs, service accounts, IAM bindings,
+   scheduler/trigger resources.
+2. Keep SQL transformation logic in Dataform code (`definitions/*.sqlx`)
+   versioned with Git and reviewed via PR.
+3. Preserve remote state separation by concern:
+   `bootstrap` state and `environments/study` state remain isolated.
+4. Use the same CI gating style already used here:
+   `fmt/init/validate/tflint/checkov/plan` on PR, `apply` only on merge.
+5. Add Dataform checks to CI:
+   compile/test assertions on PR, run workflow only after merge.
+
+Suggested module boundaries if the stack grows:
+
+- `modules/ingestion` (Cloud Run + Pub/Sub + DLQ)
+- `modules/raw_storage` (BigQuery Raw + GCS archive)
+- `modules/analytics_dataform` (Dataform + Silver/Gold datasets + IAM)
+
+For this study repository size, the current flat layout is still valid;
+module extraction is recommended only when multiple environments/teams
+start reusing the same patterns.

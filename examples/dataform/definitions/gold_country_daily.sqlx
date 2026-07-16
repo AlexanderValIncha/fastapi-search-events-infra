@@ -1,0 +1,17 @@
+config {
+  type: "table",
+  schema: "hotel_search_gold",
+  name: "country_daily",
+  tags: ["gold", "trend"]
+}
+
+select
+  city,
+  search_date,
+  user_country,
+  sum(search_count) as search_count
+from ${ref("fact_search_event")}
+where city is not null
+  and search_date is not null
+  and user_country is not null
+group by city, search_date, user_country;
