@@ -39,6 +39,12 @@ terraform plan
 terraform apply
 ```
 
+Safety rules for local copies:
+
+- Keep real values only in local `backend.hcl` / `terraform.tfvars` (both gitignored).
+- Do not commit absolute machine paths (`C:\Users\...`, `/home/...`, etc.) in docs or config.
+- Keep `*.example` files placeholder-only and provider-neutral.
+
 Applying this stack for real was **not** performed while building this
 repository.
 
