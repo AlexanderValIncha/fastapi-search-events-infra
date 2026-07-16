@@ -116,3 +116,20 @@ verify:
 A `terraform plan` against a real project (with real credentials) is
 required to validate those aspects, and was intentionally not run as part
 of this exercise.
+
+## Template hygiene before committing
+
+When preparing a PR, keep repository examples anonymized and safe-by-default:
+
+- Commit only `*.example` templates with placeholder values.
+- Never commit real secret values, local absolute paths, or filled-in backend/tfvars files.
+- Keep machine-specific values only in local gitignored files (`backend.hcl`, `terraform.tfvars`).
+
+Quick check (PowerShell, from repo root):
+
+```powershell
+$files = git ls-files
+Select-String -Path $files -Pattern 'C:\\Users\\|/home/|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z\-_]{35}' -CaseSensitive:$false
+```
+
+The command should return no matches for tracked repository content.
