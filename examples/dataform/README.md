@@ -37,3 +37,12 @@ Hardening choices in this example:
   Pub/Sub `publish_time`.
 - Missing city is imputed as `UNKNOWN_CITY` to avoid dropping otherwise
   valid events before trend aggregation.
+
+Incremental strategy in this example:
+
+- Silver fact is incremental, keyed by (`partner_id`, `event_id`), with a
+  3-day reprocessing window on `publish_time` for late arrivals.
+- Gold trend tables are incremental, keyed by their grain dimensions, with
+  a 7-day reprocessing window on `search_date`.
+- Partitioning is set on `search_date`; clustering follows each trend
+  dimension to reduce scanned bytes in analytics queries.
