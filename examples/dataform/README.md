@@ -4,6 +4,13 @@ This folder contains a minimal SQLX example for a RAW -> Silver -> Gold design.
 It is intentionally not wired to Terraform resources yet; it serves as a
 reference implementation for model shape and semantics.
 
+This means the repository now includes practical implementation examples of
+Dataform models for this use case (not only architecture notes):
+
+- Silver models
+- Gold trend models
+- Data quality assertions
+
 Business semantic model:
 
 - Metric counted is searches (one canonical search event = one unit).
