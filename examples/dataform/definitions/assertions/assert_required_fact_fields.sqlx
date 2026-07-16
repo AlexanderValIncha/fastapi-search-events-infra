@@ -1,0 +1,13 @@
+config {
+  type: "assertion",
+  schema: "hotel_search_silver",
+  name: "assert_required_fact_fields",
+  tags: ["assertion", "dq", "silver"]
+}
+
+select *
+from ${ref("fact_search_event")}
+where event_id is null
+   or partner_id is null
+   or search_date is null
+   or arrival_date is null;

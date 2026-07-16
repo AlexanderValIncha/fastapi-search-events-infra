@@ -1,0 +1,13 @@
+config {
+  type: "table",
+  schema: "hotel_search_silver",
+  name: "dim_hotel",
+  tags: ["silver", "dimension"]
+}
+
+select
+  hotel_id,
+  any_value(city) as city
+from ${ref("fact_search_event")}
+where hotel_id is not null
+group by hotel_id;

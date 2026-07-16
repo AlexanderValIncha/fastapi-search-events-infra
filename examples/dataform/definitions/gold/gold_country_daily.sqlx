@@ -1,0 +1,25 @@
+config {
+  type: "incremental",
+  schema: "hotel_search_gold",
+  name: "country_daily",
+  uniqueKey: ["city", "search_date", "user_country"],
+  bigquery: {
+    partitionBy: "search_date",
+    clusterBy: ["city", "user_country"]
+  },
+  tags: ["gold", "trend"]
+}
+
+select
+  city,
+  search_date,
+  user_country,
+  sum(search_count) as search_count
+from ${ref("fact_search_event")}
+where city is not null
+  and search_date is not null
+  and user_country is not null
+  ${when(incremental(), `
+    and search_date >= date_sub(current_date(), interval 7 day)
+  `, ``)}
+group by city, search_date, user_country;

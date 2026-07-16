@@ -87,6 +87,7 @@ fastapi-search-events-infra/
 ├── environments/study/     # The actual workload: Pub/Sub, BigQuery, GCS, Cloud Run
 ├── cloudbuild/              # CI configs: plan (PRs) and apply (main only)
 ├── docs/                    # architecture, decisions, deployment, iam, monitoring, cost
+├── examples/dataform/       # Minimal Dataform model implementation examples (Silver/Gold/assertions)
 ├── .tflint.hcl
 ├── .gitignore
 └── LICENSE

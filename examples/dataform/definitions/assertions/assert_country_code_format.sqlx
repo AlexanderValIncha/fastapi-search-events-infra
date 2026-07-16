@@ -1,0 +1,11 @@
+config {
+  type: "assertion",
+  schema: "hotel_search_silver",
+  name: "assert_country_code_format",
+  tags: ["assertion", "dq", "silver"]
+}
+
+select *
+from ${ref("fact_search_event")}
+where user_country is not null
+  and not regexp_contains(user_country, r'^[A-Z]{2}$');

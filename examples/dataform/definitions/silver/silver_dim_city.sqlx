@@ -1,0 +1,12 @@
+config {
+  type: "table",
+  schema: "hotel_search_silver",
+  name: "dim_city",
+  tags: ["silver", "dimension"]
+}
+
+select distinct
+  city,
+  cast(null as string) as geography
+from ${ref("fact_search_event")}
+where city is not null;
