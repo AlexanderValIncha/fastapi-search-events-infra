@@ -14,13 +14,14 @@ with raw_events as (
     cast(json_value(data, '$.schema_version') as string) as schema_version,
     safe_cast(json_value(data, '$.ingested_at') as timestamp) as ingested_at,
     publish_time,
+    safe_cast(json_value(data, '$.payload.timestamp') as timestamp) as event_timestamp,
     safe_cast(json_value(data, '$.payload.arrival_date') as date) as arrival_date,
     safe_cast(json_value(data, '$.payload.departure_date') as date) as departure_date,
     safe_cast(json_value(data, '$.payload.length_of_stay') as int64) as length_of_stay,
     upper(cast(json_value(data, '$.payload.user_country') as string)) as user_country,
     safe_cast(json_value(data, '$.payload.hotel_id') as int64) as hotel_id,
     cast(json_value(data, '$.payload.hotel_name') as string) as hotel_name,
-    cast(json_value(data, '$.payload.city') as string) as city,
+    coalesce(cast(json_value(data, '$.payload.city') as string), 'UNKNOWN_CITY') as city,
     1 as search_count
   from hotel_search_raw.pubsub_search_events
 ),
@@ -31,7 +32,6 @@ deduped as (
   where event_id is not null
     and partner_id is not null
     and arrival_date is not null
-    and city is not null
   qualify row_number() over (
     partition by partner_id, event_id
     order by publish_time desc
@@ -44,6 +44,7 @@ select
   schema_version,
   ingested_at,
   publish_time,
+  event_timestamp,
   arrival_date,
   departure_date,
   length_of_stay,
@@ -51,6 +52,7 @@ select
   hotel_id,
   hotel_name,
   city,
-  date(publish_time) as search_date,
+  date(coalesce(event_timestamp, publish_time)) as search_date,
+  city = 'UNKNOWN_CITY' as is_city_imputed,
   search_count
 from deduped;

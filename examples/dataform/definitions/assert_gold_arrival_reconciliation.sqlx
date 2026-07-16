@@ -1,0 +1,29 @@
+config {
+  type: "assertion",
+  schema: "hotel_search_gold",
+  name: "assert_gold_arrival_reconciliation",
+  tags: ["assertion", "dq", "gold"]
+}
+
+with fact_daily as (
+  select
+    search_date,
+    sum(search_count) as fact_search_count
+  from ${ref("fact_search_event")}
+  group by search_date
+),
+gold_daily as (
+  select
+    search_date,
+    sum(search_count) as gold_search_count
+  from ${ref("arrival_daily")}
+  group by search_date
+)
+select
+  coalesce(f.search_date, g.search_date) as search_date,
+  coalesce(f.fact_search_count, 0) as fact_search_count,
+  coalesce(g.gold_search_count, 0) as gold_search_count
+from fact_daily f
+full outer join gold_daily g
+  on f.search_date = g.search_date
+where coalesce(f.fact_search_count, 0) != coalesce(g.gold_search_count, 0);

@@ -26,3 +26,14 @@ Included SQLX models:
 - gold_arrival_daily.sqlx
 - gold_country_daily.sqlx
 - gold_stay_length_daily.sqlx
+- assert_unique_event_key.sqlx
+- assert_required_fact_fields.sqlx
+- assert_country_code_format.sqlx
+- assert_gold_arrival_reconciliation.sqlx
+
+Hardening choices in this example:
+
+- `search_date` is derived from payload event timestamp, with fallback to
+  Pub/Sub `publish_time`.
+- Missing city is imputed as `UNKNOWN_CITY` to avoid dropping otherwise
+  valid events before trend aggregation.
