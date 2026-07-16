@@ -18,18 +18,21 @@ Suggested datasets:
 - hotel_search_silver
 - hotel_search_gold
 
-Included SQLX models:
+Included SQLX models (organized by folder):
 
-- silver_fact_search_event.sqlx
-- silver_dim_city.sqlx
-- silver_dim_hotel.sqlx
-- gold_arrival_daily.sqlx
-- gold_country_daily.sqlx
-- gold_stay_length_daily.sqlx
-- assert_unique_event_key.sqlx
-- assert_required_fact_fields.sqlx
-- assert_country_code_format.sqlx
-- assert_gold_arrival_reconciliation.sqlx
+- definitions/silver/
+- definitions/silver/silver_fact_search_event.sqlx
+- definitions/silver/silver_dim_city.sqlx
+- definitions/silver/silver_dim_hotel.sqlx
+- definitions/gold/
+- definitions/gold/gold_arrival_daily.sqlx
+- definitions/gold/gold_country_daily.sqlx
+- definitions/gold/gold_stay_length_daily.sqlx
+- definitions/assertions/
+- definitions/assertions/assert_unique_event_key.sqlx
+- definitions/assertions/assert_required_fact_fields.sqlx
+- definitions/assertions/assert_country_code_format.sqlx
+- definitions/assertions/assert_gold_arrival_reconciliation.sqlx
 
 Hardening choices in this example:
 
